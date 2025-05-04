@@ -1,0 +1,13 @@
+[project]
+name = "code1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lightning>=2.5.1",
+    "mlflow>=2.21.2",
+    "peft>=0.15.2",
+    "seaborn>=0.13.2",
+    "transformers>=4.50.3",
+]
