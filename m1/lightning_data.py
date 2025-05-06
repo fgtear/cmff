@@ -157,10 +157,8 @@ class LightningData(L.LightningDataModule):
         if stage == "fit":
             self.train_data = Dataset("train", self.config)
             self.val_data = Dataset("valid", self.config)
-            self.test_data = Dataset("test", self.config)
         elif stage == "validate":
             self.val_data = Dataset("valid", self.config)
-            self.test_data = Dataset("test", self.config)
         elif stage == "test" or stage == "predict":
             self.test_data = Dataset("test", self.config)
         else:
@@ -178,26 +176,15 @@ class LightningData(L.LightningDataModule):
         )
 
     def val_dataloader(self):
-        return [
-            DataLoader(
-                self.val_data,
-                batch_size=self.config.batch_size_eval,
-                shuffle=False,
-                num_workers=self.config.num_workers,
-                persistent_workers=True if self.config.num_workers > 0 else False,
-                pin_memory=True,
-                collate_fn=self.collate_fn,
-            ),
-            DataLoader(
-                self.test_data,
-                batch_size=self.config.batch_size_eval,
-                shuffle=False,
-                num_workers=self.config.num_workers,
-                persistent_workers=True if self.config.num_workers > 0 else False,
-                pin_memory=True,
-                collate_fn=self.collate_fn,
-            ),
-        ]
+        return DataLoader(
+            self.val_data,
+            batch_size=self.config.batch_size_eval,
+            shuffle=False,
+            num_workers=self.config.num_workers,
+            persistent_workers=True if self.config.num_workers > 0 else False,
+            pin_memory=True,
+            collate_fn=self.collate_fn,
+        )
 
     def test_dataloader(self):
         return DataLoader(

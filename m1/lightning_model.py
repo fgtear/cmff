@@ -5,7 +5,6 @@ import sys
 sys.path.append("..")
 sys.path.append("/root/autodl-tmp/code1/")
 # 输出环境目录
-print("当前环境目录:", sys.path)
 
 import torch
 from torch import nn

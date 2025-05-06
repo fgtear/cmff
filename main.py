@@ -83,7 +83,7 @@ def main(config):
         accumulate_grad_batches=config.accumulate_grad_batches,
         # profiler=AdvancedProfiler(),  # default is None, optional is SimpleProfiler, AdvancedProfiler
         # default_root_dir="logs",
-        num_sanity_val_steps=2,  # default is 2
+        num_sanity_val_steps=0 if config.platform == "Darwin" else 2,
         limit_train_batches=1 if config.platform == "Darwin" else 1.0,
         limit_val_batches=1 if config.platform == "Darwin" else 1.0,
         limit_test_batches=1 if config.platform == "Darwin" else 1.0,
