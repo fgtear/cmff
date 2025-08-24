@@ -1,22 +1,20 @@
-""" """
-
-import sys
-
-sys.path.append("..")
-sys.path.append("/root/autodl-tmp/code1/")
-# 输出环境目录
-
 import torch
 from torch import nn
 import torch.nn.functional as F
 import lightning as L
 from transformers import AutoModel, RobertaModel
 import transformers
-from utils.utils import sequence_mean
-from utils.metrics import MOSIMetrics
+
 import numpy as np
 import os
-from analysis.visualization import tsne_visualization
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from utils.utils import sequence_mean
+from utils.metrics import MOSIMetrics
+from cmff.analysis.visualization import tsne_visualization
+from thop import profile
 
 
 class LightningModel(L.LightningModule):
@@ -35,13 +33,11 @@ class LightningModel(L.LightningModule):
 
         self.text_extractor = AutoModel.from_pretrained(
             config.text_extractor,
-            cache_dir=config.cache_dir,
             output_hidden_states=True,
             add_pooling_layer=False,
         )
         self.audio_extractor = AutoModel.from_pretrained(
             config.audio_extractor,
-            cache_dir=config.cache_dir,
             output_hidden_states=True,
         )
         self.projector = nn.Sequential(
@@ -75,9 +71,10 @@ class LightningModel(L.LightningModule):
         # )
         if config.platform == "Darwin":
             return
-        ######################################################################################
+        #####################################################################################
         # text_pretrained = torch.load(
-        #     "mlruns/0/0f149096a2cb4f7b8791b204b4d6334a/artifacts/checkpoints/best_model.ckpt", map_location=self.device
+        #     "cmff/mlruns/0/0f149096a2cb4f7b8791b204b4d6334a/artifacts/checkpoints/best_model.ckpt",
+        #     map_location=self.device,
         # )
         # for name, param in self.text_extractor.named_parameters():
         #     name = "text_extractor." + name
@@ -87,9 +84,10 @@ class LightningModel(L.LightningModule):
         #         # if "attention" not in name:
         #         # param.requires_grad = False
         # del text_pretrained
-        ######################################################################################
+        # #####################################################################################
         # audio_pretrained = torch.load(
-        #     "mlruns/0/791f0a2d7d7a45ef9e7942bd32c4fdaa/artifacts/checkpoints/best_model.ckpt", map_location=self.device
+        #     "cmff/mlruns/0/791f0a2d7d7a45ef9e7942bd32c4fdaa/artifacts/checkpoints/best_model.ckpt",
+        #     map_location=self.device,
         # )
         # for name, param in self.audio_extractor.named_parameters():
         #     name = "audio_extractor." + name
@@ -99,7 +97,7 @@ class LightningModel(L.LightningModule):
         #         # if "attention" not in name:
         #         # param.requires_grad = False
         # del audio_pretrained
-        ######################################################################################
+        #####################################################################################
         # del self.text_extractor
         # del self.audio_extractor
 
@@ -160,6 +158,7 @@ class LightningModel(L.LightningModule):
         text_feature = [i[:, 0, :] for i in text_output.hidden_states]
         del text_output
         text_feature = torch.stack(text_feature, dim=1)
+        audio_input_values = audio_input_values.to(torch.float32)  # TODO:
         audio_output = self.audio_extractor(audio_input_values, attention_mask=audio_attention_mask)
         audio_feature = [sequence_mean(i, audio_output_attention_mask.sum(1)) for i in audio_output.hidden_states]
         del audio_output
@@ -292,8 +291,8 @@ class LightningModel(L.LightningModule):
                 prrams_others.append(param)
         optimizer = torch.optim.AdamW(
             [
-                {"params": params_text, "lr": 2e-5, "weight_decay": self.config.weight_decay},
-                {"params": params_audio, "lr": 1e-4, "weight_decay": self.config.weight_decay},
+                {"params": params_text, "lr": 2e-5 / 4, "weight_decay": self.config.weight_decay},
+                {"params": params_audio, "lr": 1e-4 / 2, "weight_decay": self.config.weight_decay},
                 {"params": prrams_others, "lr": self.config.learning_rate, "weight_decay": self.config.weight_decay},
             ],
             betas=(0.9, 0.999),
@@ -418,9 +417,10 @@ class LightningModel(L.LightningModule):
         prediction = torch.cat(self.test_prediction, dim=0).float().numpy()
         label = torch.cat(self.test_label, dim=0).float().numpy()
         feature = torch.cat(self.test_feature, dim=0).float().numpy()
-        np.save(prediction_path := "analysis/prediction.npy", prediction)
-        np.save(label_path := "analysis/label.npy", label)
-        np.save(feature_path := "analysis/feature.npy", feature)
+        os.makedirs("cmff/temp", exist_ok=True)
+        np.save(prediction_path := "cmff/temp/prediction.npy", prediction)
+        np.save(label_path := "cmff/temp/label.npy", label)
+        np.save(feature_path := "cmff/temp/feature.npy", feature)
         self.logger.experiment.log_artifact(run_id=self.logger.run_id, local_path=prediction_path, artifact_path="")
         self.logger.experiment.log_artifact(run_id=self.logger.run_id, local_path=label_path, artifact_path="")
         self.logger.experiment.log_artifact(run_id=self.logger.run_id, local_path=feature_path, artifact_path="")
@@ -431,7 +431,7 @@ class LightningModel(L.LightningModule):
         if self.test_attn_output_weights != []:
             # attn_output_weights: [num_test_samples, num_layers, batch_size, seq_len, seq_len]
             attn_output_weights = torch.cat(self.test_attn_output_weights, dim=0).float().numpy()
-            np.save(attn_output_weights_path := "analysis/attn_output_weights.npy", attn_output_weights)
+            np.save(attn_output_weights_path := "cmff/temp/attn_output_weights.npy", attn_output_weights)
             # print("attn_output_weights", attn_output_weights.shape)  # TODO:
             self.logger.experiment.log_artifact(run_id=self.logger.run_id, local_path=attn_output_weights_path, artifact_path="")
             os.remove(attn_output_weights_path)
@@ -462,7 +462,6 @@ class LightningModel(L.LightningModule):
         # seq_len = 51, cls + 25text + 25audio
         # num_layers = 3 代表了有3层
         # batch_size = 1
-        # 帮我可视化注意力权重
 
         try:
             with torch.no_grad():
@@ -794,16 +793,38 @@ if __name__ == "__main__":
         # log_model=True,
     )
 
+    config.batch_size_eval = 1
     dm = LightningData(config)
-    # model = LightningModel(config)
-    # model = LightningModel.load_from_checkpoint("best_model.ckpt", config=config)
-    model = LightningModel.load_from_checkpoint(
-        "/root/autodl-tmp/code1/mlruns/0/98742fe45fc741389c6685db84db4154/artifacts/checkpoints/best_model.ckpt", config=config
-    )
-    trainer = L.Trainer(
-        logger=logger,
-        precision="16-mixed",
-        accelerator="cpu",
-    )
+    dm.setup(stage="test")
+    for batch in dm.test_dataloader():
+        print(len(batch))
+        print(batch)
+        break
+
+    model = LightningModel(config)
+    model.eval()
+    total_params = sum(p.numel() for p in model.parameters())
+    print("total_params", total_params)
+
+    # model = LightningModel.load_from_checkpoint(
+    #     "/root/autodl-tmp/code1/mlruns/0/98742fe45fc741389c6685db84db4154/artifacts/checkpoints/best_model.ckpt",
+    # config=config,
+    # )
+    # trainer = L.Trainer(
+    #     logger=logger,
+    #     precision="16-mixed",
+    #     # accelerator="cpu",
+    # )
     # trainer.test(model=model, datamodule=dm)
-    trainer.predict(model=model, datamodule=dm)
+    # trainer.predict(model=model, datamodule=dm)
+
+    for batch in dm.test_dataloader():
+        print(len(batch))
+        print(batch)
+
+        # 计算FLOPs
+        # 只用第一个batch做profile
+        input_args = (batch,)
+        flops, params = profile(model, inputs=input_args, verbose=False)
+        print(f"模型FLOPs: {flops / 1e9:.2f} GFLOPs, 参数量: {params / 1e6:.2f} M")
+        break

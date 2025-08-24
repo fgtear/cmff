@@ -22,22 +22,22 @@ import os
 class DatasetMosi(torch.utils.data.Dataset):
     def __init__(self, mode: typing.Literal["train", "test", "valid"], config):
         if config.dataset == "MOSI":
-            self.data_root = "../datasets/MOSI"
+            self.data_root = "datasets/MOSI"
         elif config.dataset == "MOSEI":
-            self.data_root = "../datasets/MOSEI"
+            self.data_root = "datasets/MOSEI"
         else:
             raise ValueError("Invalid dataset configuration.")
 
         # 缓存
-        if os.path.exists(f"../datasets/{config.dataset}/{mode}/file_name.pkl"):
+        if os.path.exists(f"datasets/{config.dataset}/{mode}/file_name.pkl"):
             print(f"load cache {mode} data")
-            self.file_name = pkl.load(open(f"../datasets/{config.dataset}/{mode}/file_name.pkl", "rb"))
-            self.text = pkl.load(open(f"../datasets/{config.dataset}/{mode}/text.pkl", "rb"))
-            self.label = pkl.load(open(f"../datasets/{config.dataset}/{mode}/label.pkl", "rb"))
-            self.text_input_ids = pkl.load(open(f"../datasets/{config.dataset}/{mode}/text_input_ids.pkl", "rb"))
-            self.text_attention_mask = pkl.load(open(f"../datasets/{config.dataset}/{mode}/text_attention_mask.pkl", "rb"))
-            self.audio_input_values = pkl.load(open(f"../datasets/{config.dataset}/{mode}/audio_input_values.pkl", "rb"))
-            self.audio_attention_mask = pkl.load(open(f"../datasets/{config.dataset}/{mode}/audio_attention_mask.pkl", "rb"))
+            self.file_name = pkl.load(open(f"datasets/{config.dataset}/{mode}/file_name.pkl", "rb"))
+            self.text = pkl.load(open(f"datasets/{config.dataset}/{mode}/text.pkl", "rb"))
+            self.label = pkl.load(open(f"datasets/{config.dataset}/{mode}/label.pkl", "rb"))
+            self.text_input_ids = pkl.load(open(f"datasets/{config.dataset}/{mode}/text_input_ids.pkl", "rb"))
+            self.text_attention_mask = pkl.load(open(f"datasets/{config.dataset}/{mode}/text_attention_mask.pkl", "rb"))
+            self.audio_input_values = pkl.load(open(f"datasets/{config.dataset}/{mode}/audio_input_values.pkl", "rb"))
+            self.audio_attention_mask = pkl.load(open(f"datasets/{config.dataset}/{mode}/audio_attention_mask.pkl", "rb"))
             return
 
         print(f"Loading {mode} data...")
@@ -112,15 +112,15 @@ class DatasetMosi(torch.utils.data.Dataset):
                 assert len(self.label) == 4659
 
         # 保存数据
-        if not os.path.exists(f"../datasets/{config.dataset}/{mode}"):
-            os.makedirs(f"../datasets/{config.dataset}/{mode}")
-        pkl.dump(self.file_name, open(f"../datasets/{config.dataset}/{mode}/file_name.pkl", "wb"))
-        pkl.dump(self.text, open(f"../datasets/{config.dataset}/{mode}/text.pkl", "wb"))
-        pkl.dump(self.label, open(f"../datasets/{config.dataset}/{mode}/label.pkl", "wb"))
-        pkl.dump(self.text_input_ids, open(f"../datasets/{config.dataset}/{mode}/text_input_ids.pkl", "wb"))
-        pkl.dump(self.text_attention_mask, open(f"../datasets/{config.dataset}/{mode}/text_attention_mask.pkl", "wb"))
-        pkl.dump(self.audio_input_values, open(f"../datasets/{config.dataset}/{mode}/audio_input_values.pkl", "wb"))
-        pkl.dump(self.audio_attention_mask, open(f"../datasets/{config.dataset}/{mode}/audio_attention_mask.pkl", "wb"))
+        if not os.path.exists(f"datasets/{config.dataset}/{mode}"):
+            os.makedirs(f"datasets/{config.dataset}/{mode}")
+        pkl.dump(self.file_name, open(f"datasets/{config.dataset}/{mode}/file_name.pkl", "wb"))
+        pkl.dump(self.text, open(f"datasets/{config.dataset}/{mode}/text.pkl", "wb"))
+        pkl.dump(self.label, open(f"datasets/{config.dataset}/{mode}/label.pkl", "wb"))
+        pkl.dump(self.text_input_ids, open(f"datasets/{config.dataset}/{mode}/text_input_ids.pkl", "wb"))
+        pkl.dump(self.text_attention_mask, open(f"datasets/{config.dataset}/{mode}/text_attention_mask.pkl", "wb"))
+        pkl.dump(self.audio_input_values, open(f"datasets/{config.dataset}/{mode}/audio_input_values.pkl", "wb"))
+        pkl.dump(self.audio_attention_mask, open(f"datasets/{config.dataset}/{mode}/audio_attention_mask.pkl", "wb"))
 
     def __getitem__(self, index):
         file_name = self.file_name[index]
@@ -157,8 +157,10 @@ class LightningData(L.LightningDataModule):
         if stage == "fit":
             self.train_data = Dataset("train", self.config)
             self.val_data = Dataset("valid", self.config)
+            self.test_data = Dataset("test", self.config)
         elif stage == "validate":
             self.val_data = Dataset("valid", self.config)
+            self.test_data = Dataset("test", self.config)
         elif stage == "test" or stage == "predict":
             self.test_data = Dataset("test", self.config)
         else:
@@ -176,15 +178,26 @@ class LightningData(L.LightningDataModule):
         )
 
     def val_dataloader(self):
-        return DataLoader(
-            self.val_data,
-            batch_size=self.config.batch_size_eval,
-            shuffle=False,
-            num_workers=self.config.num_workers,
-            persistent_workers=True if self.config.num_workers > 0 else False,
-            pin_memory=True,
-            collate_fn=self.collate_fn,
-        )
+        return [
+            DataLoader(
+                self.val_data,
+                batch_size=self.config.batch_size_eval,
+                shuffle=False,
+                num_workers=self.config.num_workers,
+                persistent_workers=True if self.config.num_workers > 0 else False,
+                pin_memory=True,
+                collate_fn=self.collate_fn,
+            ),
+            DataLoader(
+                self.test_data,
+                batch_size=self.config.batch_size_eval,
+                shuffle=False,
+                num_workers=self.config.num_workers,
+                persistent_workers=True if self.config.num_workers > 0 else False,
+                pin_memory=True,
+                collate_fn=self.collate_fn,
+            ),
+        ]
 
     def test_dataloader(self):
         return DataLoader(

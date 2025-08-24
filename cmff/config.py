@@ -11,7 +11,7 @@ class Config:
         self.devices = [0] if self.platform != "Darwin" else "auto"
         self.strategy = "auto"
         self.accelerator = "auto" if self.platform != "Darwin" else "cpu"
-        self.num_workers = 15 if self.platform != "Darwin" else 0
+        self.num_workers = 2 if self.platform != "Darwin" else 0
         self.num_GPU = len(self.devices) if self.platform != "Darwin" else 1
         self.precision = "16-mixed" if self.platform != "Darwin" else "32"  # 16-mixed, bf16-mixed
 
@@ -24,22 +24,21 @@ class Config:
         # facebook/data2vec-audio-base-960h
         # facebook/wav2vec2-large-robust-ft-libri-960h
         self.audio_extractor = "facebook/wav2vec2-large-robust-ft-libri-960h"
-        self.cache_dir = "./.cache" if self.platform != "Darwin" else None
         self.monitor = "metrics/MAE_val"  # metrics/MAE_val, metrics/MAE_test
         self.monitor_mode = "min"
 
         self.fast_dev_run = 0  # default is 0
-        self.max_epochs = 9 if self.platform != "Darwin" else 1  # default is -1  for infinite
+        self.max_epochs = 26 if self.platform != "Darwin" else 1  # default is -1  for infinite
         self.batch_size_train = 8 if self.platform != "Darwin" else 32
-        self.batch_size_eval = 16 if self.platform != "Darwin" else 32
+        self.batch_size_eval = 32 if self.platform != "Darwin" else 32
         self.audio_max_length = 163840  # 163840, 327680, 655360
         self.text_max_length = 512
         # self.layer_index = None
 
         self.seed = 0
-        self.learning_rate = 5e-5
+        self.learning_rate = 1e-5
         self.dropout = 0.3
-        self.weight_decay = 0.000
+        self.weight_decay = 0.0
         self.accumulate_grad_batches = 1  # default is 1
         self.gradient_clip_val = 0  # default is None
         self.data_time = datetime.datetime.now().strftime("%m%d%H%M")
@@ -65,7 +64,6 @@ class Config:
         dic.pop("monitor")
         dic.pop("monitor_mode")
         dic.pop("fast_dev_run")
-        dic.pop("cache_dir")
         return dic
 
 

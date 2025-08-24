@@ -57,23 +57,31 @@ def visualize_label_distribution(dataset: pd.DataFrame, save_path: str = None):
 
     # --- 自定义图形外观 ---
     # 设置标题
-    g.fig.suptitle("Distribution of Labels across Data Splits", y=1.03, fontsize=16)  # y 调整标题位置防止重叠
+    # g.fig.suptitle("Distribution of Labels across Data Splits", y=1.03, fontsize=16)  # y 调整标题位置防止重叠
 
     # 设置轴标签
-    g.set_axis_labels("Label Value (Sentiment Score)", "Density", fontsize=14)
+    g.set_axis_labels("Label Value (Sentiment Score)", "Density", fontsize=21)
+
+    # 调整 Y 轴标签与轴的距离
+    # displot 返回 FacetGrid，它可能包含多个子图 (axes)
+    # 在本例中，只有一个子图，可以通过 g.ax 访问
+    if hasattr(g, "ax") and g.ax is not None:
+        g.ax.yaxis.labelpad = 15  # 增加这个值会让标签离轴更远
 
     # 设置 x 轴范围，确保覆盖 -3 到 3，并留有一些边距
     plt.xlim(-3.5, 3.5)
 
-    # 调整图例
-    g.legend.set_title("Dataset Split")
-    g.legend.get_title().set_fontsize(12)
-    for t in g.legend.texts:
-        t.set_fontsize(12)
+    # 调整图例 - 增加检查确保图例存在
+    if g.legend is not None:
+        g.legend.set_title("Dataset Split")
+        if g.legend.get_title() is not None:
+            g.legend.get_title().set_fontsize(21)
+        for t in g.legend.texts:
+            t.set_fontsize(21)
 
     # 调整刻度标签大小
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.xticks(fontsize=21)
+    plt.yticks(fontsize=21)
 
     # 移除顶部和右侧的轴线（根据喜好选择，有时 'ticks' 风格更需要）
     # sns.despine(fig=g.fig) # displot 返回的是 FacetGrid，可以直接操作 fig
@@ -99,12 +107,12 @@ def visualize_label_distribution(dataset: pd.DataFrame, save_path: str = None):
 
 # --- 示例用法 ---
 if __name__ == "__main__":
-    df_mosi = pd.read_csv("../data/MOSI/label.csv")
-    df_mosei = pd.read_csv("../data/MOSEI/label.csv")
+    df_mosi = pd.read_csv("datasets/MOSI/label.csv")
+    df_mosei = pd.read_csv("datasets/MOSEI/label.csv")
     # 调用函数进行可视化
     visualize_label_distribution(df_mosi)
     visualize_label_distribution(df_mosei)
 
     # 调用函数并保存图形
-    visualize_label_distribution(df_mosi, save_path="mosi_distribution.png")
-    visualize_label_distribution(df_mosei, save_path="mosei_distribution.png")
+    visualize_label_distribution(df_mosi, save_path="cmff/analysis/Figure_mosi_distribution.png")
+    visualize_label_distribution(df_mosei, save_path="cmff/analysis/Figure_mosei_distribution.png")

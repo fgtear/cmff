@@ -25,15 +25,15 @@ def add_p_value_annotation(ax, x1, x2, y, p_value, height_factor=1.05):
         p_text = f"p = {p_value:.3f}"  # Or "n.s." for non-significant
 
     # Add the text
-    ax.text((x1 + x2) * 0.5, line_y + bracket_height, p_text, ha="center", va="bottom", color="black", fontsize=12)
+    ax.text((x1 + x2) * 0.5, line_y + bracket_height, p_text, ha="center", va="bottom", color="black", fontsize=13.5)
 
     # Adjust ylim slightly to make space
     current_ylim = ax.get_ylim()
     ax.set_ylim(current_ylim[0], (line_y + bracket_height) * 1.05)  # Ensure space above annotation
 
 
-# Set a professional style (important for SCI papers)
-sns.set_theme(style="ticks", context="paper", font_scale=1.2)  # 'paper', 'notebook', 'talk', 'poster'
+sns.set_theme(style="ticks", context="paper")  # 'paper', 'notebook', 'talk', 'poster'
+plt.rc("font", size=33)
 
 
 def plot_error_distribution(
@@ -68,6 +68,7 @@ def plot_error_distribution(
         dpi (int): Dots per inch for saving the figure.
         **kwargs: Additional keyword arguments passed to sns.boxplot/violinplot.
     """
+    np.random.seed(0)  # Set seed for reproducible jitter
     label = np.asarray(label)
     prediction1 = np.asarray(prediction1)
     prediction2 = np.asarray(prediction2)
@@ -87,8 +88,10 @@ def plot_error_distribution(
         p_value_one_sided = 1.0 - p_value_two_sided / 2
 
     print(
-        f"Paired t-test results: t-statistic = {t_stat:.3f}, "
-        f"p-value (one-sided, H1: {model1_name} error < {model2_name} error) = {p_value_one_sided:.3g}"
+        (
+            f"Paired t-test results: t-statistic = {t_stat:.3f}, "
+            f"p-value (one-sided, H1: {model1_name} error < {model2_name} error) = {p_value_one_sided:.3g}"
+        )
     )
 
     # Prepare data for Seaborn (long format)
@@ -115,9 +118,12 @@ def plot_error_distribution(
         # Use stripplot for overlaying points - often better than swarmplot for larger N
         sns.stripplot(x="Model", y="Absolute Error", data=df_errors, ax=ax, color="black", alpha=0.3, jitter=True, size=3)
 
-    ax.set_title(title)
-    ax.set_ylabel("Absolute Error (|Prediction - Label|)")
-    ax.set_xlabel("")  # Model names are on x-ticks
+    # ax.set_title(title)
+    # ax.set_ylabel("Absolute Error (|Prediction - Label|)", fontsize=13.5)
+    ax.set_ylabel("Absolute Error Value", fontsize=13.5)
+    ax.set_xlabel("", fontsize=13.5)  # Model names are on x-ticks
+    ax.tick_params(axis="x", labelsize=13.5)
+    ax.tick_params(axis="y", labelsize=13.5)
 
     # Add significance annotation
     y_max = df_errors["Absolute Error"].max()
@@ -133,30 +139,40 @@ def plot_error_distribution(
     return ax
 
 
-# --- Example Data ---
-# np.random.seed(42)
-# n_samples = 100
-# label = np.random.rand(n_samples) * 10
-# prediction1 = label + np.random.normal(0, 1.0, n_samples)  # Model 1: Decent predictions with some noise
-# prediction2 = label + np.random.normal(0, 1.5, n_samples)  # Model 2: Slightly worse predictions (more noise)
+if __name__ == "__main__":
+    # --- Example Data ---
+    # np.random.seed(42)
+    # n_samples = 100
+    # label = np.random.rand(n_samples) * 10
+    # prediction1 = label + np.random.normal(0, 1.0, n_samples)  # Model 1: Decent predictions with some noise
+    # prediction2 = label + np.random.normal(0, 1.5, n_samples)  # Model 2: Slightly worse predictions (more noise)
 
-label = np.load("/Users/fgtear/Downloads/mosi_label.npy")
-prediction1 = np.load("/Users/fgtear/Downloads/04211235_MOSI_audio_cmff_prediction.npy")
-prediction2 = np.load("/Users/fgtear/Downloads/04211208_MOSI_audio_last_prediction.npy")
+    label = np.load("cmff/results/mosi_label.npy")
+    prediction1 = np.load("cmff/results/04211235_MOSI_audio_cmff_prediction.npy")
+    prediction2 = np.load("cmff/results/04211208_MOSI_audio_last_prediction.npy")
+    plot_error_distribution(
+        label,
+        prediction1,
+        prediction2,
+        model1_name="Multi-Layer Feature",
+        model2_name="Last Layer Feature",
+        plot_type="box",
+        show_points=True,
+        # title="Absolute Error Distribution (Multi-Layer Feature vs Last Layer Feature)",
+        save_path="cmff/analysis/Figure_audio_error_distribution_box.png",
+    )
 
-# label = np.load("/Users/fgtear/Downloads/mosi_label.npy")
-# prediction1 = np.load("/Users/fgtear/Downloads/04211047_MOSI_text_cmff_prediction.npy")
-# prediction2 = np.load("/Users/fgtear/Downloads/04211029_MOSI_text_last_prediction.npy")
-
-
-plot_error_distribution(
-    label,
-    prediction1,
-    prediction2,
-    model1_name="Multi-Layer Feature",
-    model2_name="Last Layer Feature",
-    plot_type="box",
-    show_points=True,
-    title="Absolute Error Distribution (Multi-Layer Feature vs Last Layer Feature)",
-    save_path="error_distribution_box.png",
-)  # Save as high-res PNG
+    label = np.load("cmff/results/mosi_label.npy")
+    prediction1 = np.load("cmff/results/04211047_MOSI_text_cmff_prediction.npy")
+    prediction2 = np.load("cmff/results/04211029_MOSI_text_last_prediction.npy")
+    plot_error_distribution(
+        label,
+        prediction1,
+        prediction2,
+        model1_name="Multi-Layer Feature",
+        model2_name="Last Layer Feature",
+        plot_type="box",
+        show_points=True,
+        # title="Absolute Error Distribution (Multi-Layer Feature vs Last Layer Feature)",
+        save_path="cmff/analysis/Figure_text_error_distribution_box.png",
+    )

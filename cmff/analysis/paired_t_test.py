@@ -115,17 +115,16 @@ def compare_regression_predictions(label_path, pred1_path, pred2_path, alpha=0.0
 # 3. 确保你的 .npy 文件可以被正确加载且格式符合预期。
 
 if __name__ == "__main__":
-    pass
     results = compare_regression_predictions(
-        "/Users/fgtear/Downloads/mosi_label.npy",
-        "/Users/fgtear/Downloads/04211047_MOSI_text_cmff_prediction.npy",
-        "/Users/fgtear/Downloads/04211029_MOSI_text_last_prediction.npy",
+        "cmff/results/mosi_label.npy",
+        "cmff/results/04211047_MOSI_text_cmff_prediction.npy",
+        "cmff/results/04211029_MOSI_text_last_prediction.npy",
     )
     print(results)
 
     results = compare_regression_predictions(
-        "/Users/fgtear/Downloads/mosi_label.npy",
-        "/Users/fgtear/Downloads/04211235_MOSI_audio_cmff_prediction.npy",
-        "/Users/fgtear/Downloads/04211208_MOSI_audio_last_prediction.npy",
+        "cmff/results/mosi_label.npy",
+        "cmff/results/04211235_MOSI_audio_cmff_prediction.npy",
+        "cmff/results/04211208_MOSI_audio_last_prediction.npy",
     )
     print(results)

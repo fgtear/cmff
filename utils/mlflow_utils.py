@@ -5,7 +5,6 @@ import logging
 from mlflow.tracking import MlflowClient
 from mlflow.entities import ViewType
 
-# 設定日誌記錄
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
@@ -107,7 +106,7 @@ def delete_artifacts_directory(artifact_dir_name, mlruns_path="mlruns"):
 
 def clean_deleted_artifacts(artifact_root: str, tracking_uri: str = None, dry_run: bool = True):
     """
-    清理文件系统上那些对应于已在 MLflow UI/后端删除的实验或运行的 artifact 目录。
+    清理文件系统上那些对应于已在 MLflow UI/后端删除的实验的 artifact 目录。
     只删除run目录下的artifacts文件夹，保留run目录本身和其他元数据。
 
     重要提示：此操作会永久删除文件！请务必先在 `dry_run=True` 模式下运行，
@@ -283,7 +282,6 @@ def clean_deleted_artifacts(artifact_root: str, tracking_uri: str = None, dry_ru
     logging.info("--- 清理 MLflow Artifacts 结束 ---")
 
 
-# --- 如何使用 ---
 if __name__ == "__main__":
     # os.system("mlflow gc") # 清理mlruns下的已删除实验和运行
     # delete_artifacts_directory("checkpoints")

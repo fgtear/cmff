@@ -37,8 +37,8 @@ def plot_layer_ablation(layer_metrics, optimal_layer=None, save_path=None, dpi=3
 
     # --- Primary Y-axis (Left): MAE ---
     color1 = "tab:red"
-    ax1.set_xlabel("Number of CMFF Layers")
-    ax1.set_ylabel("MAE (Lower is Better)", color=color1)
+    ax1.set_xlabel("Number of CMFF Layers", fontsize=1)
+    ax1.set_ylabel("MAE (Lower is Better)", color=color1, fontsize=12)
     line1 = ax1.plot(df.index, df["MAE"], color=color1, marker="o", linestyle="-", label="MAE")
     ax1.tick_params(axis="y", labelcolor=color1)
     ax1.set_xticks(df.index)
@@ -48,7 +48,7 @@ def plot_layer_ablation(layer_metrics, optimal_layer=None, save_path=None, dpi=3
     color_corr = "tab:blue"
     color_acc7 = "tab:green"
     color_f1 = "tab:purple"
-    ax2.set_ylabel("Metric Value (Higher is Better)")
+    ax2.set_ylabel("Metric Value (Higher is Better)", fontsize=12)
 
     line2 = ax2.plot(df.index, df["Correlation"], color=color_corr, marker="s", linestyle="--", label="Correlation")
     line3 = ax2.plot(df.index, df["Acc7"], color=color_acc7, marker="^", linestyle=":", label="Acc7")
@@ -71,9 +71,9 @@ def plot_layer_ablation(layer_metrics, optimal_layer=None, save_path=None, dpi=3
         labels.append(vline.get_label())
 
     # Place legend outside the plot using fig.legend for better handling of dual axes
-    fig.legend(lines, labels, loc="center left", bbox_to_anchor=(0.9, 0.5))  # Adjust anchor as needed
+    fig.legend(lines, labels, loc="center left", bbox_to_anchor=(0.9, 0.5), fontsize=12)  # Adjust anchor as needed
 
-    plt.title("Impact of Number of CMFF Layers on Performance (CMU-MOSI)", pad=20)
+    # plt.title("Impact of Number of CMFF Layers on Performance (CMU-MOSI)", pad=20)
     # Adjust layout to make room for legend (may need tweaking)
     fig.tight_layout(rect=[0, 0, 0.88, 1])  # Leave space on the right
 
@@ -142,4 +142,4 @@ layer_metrics_data = {
 }
 
 # --- Call the function ---
-plot_layer_ablation(layer_metrics_data, optimal_layer=3, save_path="cmff_layer_ablation.png")
+plot_layer_ablation(layer_metrics_data, optimal_layer=3, save_path="cmff/analysis/Figure_cmff_layer_ablation.png")

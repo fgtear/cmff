@@ -453,30 +453,30 @@ if __name__ == "__main__":
     #     bbox_inches="tight",
     # )
 
-    # visualize_sentiment_tsne(
-    #     features=feature,
-    #     continuous_labels=label,
-    #     save_dir="./analysis",
-    #     filename="tsne_sentiment_classes.png",
-    #     title="t-SNE Visualization by Discretized Sentiment",
-    #     random_state=42,
-    #     figsize=(10, 8),
-    #     dpi=300,
-    #     alpha=0.8,
-    #     marker_size=20,
-    # )
-    visualize_sentiment_tsne_3d(
+    visualize_sentiment_tsne(
         features=feature,
         continuous_labels=label,
-        save_dir="./",
-        filename="tsne_3d_sentiment_classes.png",
-        title="3D t-SNE Visualization by Discretized Sentiment",
+        save_dir="./analysis",
+        filename="tsne_sentiment_classes.png",
+        title="t-SNE Visualization by Discretized Sentiment",
         random_state=42,
-        figsize=(12, 10),
+        figsize=(10, 8),
         dpi=300,
-        alpha=0.9,
+        alpha=0.8,
         marker_size=20,
-        azim=-60,
-        elev=30,
     )
-    plt.show()
+    # visualize_sentiment_tsne_3d(
+    #     features=feature,
+    #     continuous_labels=label,
+    #     save_dir="./",
+    #     filename="tsne_3d_sentiment_classes.png",
+    #     title="3D t-SNE Visualization by Discretized Sentiment",
+    #     random_state=42,
+    #     figsize=(12, 10),
+    #     dpi=300,
+    #     alpha=0.9,
+    #     marker_size=20,
+    #     azim=-60,
+    #     elev=30,
+    # )
+    # plt.show()
