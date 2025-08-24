@@ -47,18 +47,19 @@ Specific preprocessing parameters can be modified within each script.
 Model training and evaluation are initiated via the `main.py` script.
 
 1.  **Configure Parameters**:
-    *   Depending on the model you want to train (e.g., `hfff` or `cmff`), modify the `Config` file referenced in `main.py`, such as `hfff/config.py`.
+    *   Depending on the model you want to train (e.g., `cmff` ), modify the `Config` file referenced in `main.py`, such as `cmff/config.py`.
     *   In the `config.py` file, you can set the dataset, model hyperparameters, learning rate, batch size, etc.
 
 2.  **Start Training**:
     Run the main script directly from the terminal:
+    
     ```bash
     python main.py
     ```
-
+    
 3.  **Experiment Tracking and Results**:
-    *   This project uses `MLFlow` for experiment tracking. You can find the experiment logs in the `hfff/mlruns` or `cmff/mlruns` directories.
+    
+    *   This project uses `MLFlow` for experiment tracking. You can find the experiment logs in the `cmff/mlruns` directories.
     *   The trained model weights and records of the best model are saved in the `artifacts/checkpoints` subdirectory of the corresponding experiment in the `mlruns` directory.
     *   Evaluation results will be output after the training is complete.
-
 
