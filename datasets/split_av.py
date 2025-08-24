@@ -75,8 +75,8 @@ def split_video2av(video_path, audio_output_path, video_output_path, sample_rate
 
 def split_dataset_multithread(directory_path, num_workers=4):
     def process_one(video_path):
-        audio_output_path = video_path.replace("Raw", "wav").replace(".mp4", ".wav")
-        video_output_path = video_path.replace("Raw", "video")
+        audio_output_path = video_path.replace("/Raw/", "/wav/").replace(".mp4", ".wav")
+        video_output_path = video_path.replace("/Raw/", "/video/")
         os.makedirs(os.path.dirname(audio_output_path), exist_ok=True)
         os.makedirs(os.path.dirname(video_output_path), exist_ok=True)
         return split_video2av(video_path, audio_output_path, video_output_path, sample_rate=16000)
@@ -109,5 +109,5 @@ if __name__ == "__main__":
     # )
 
     split_dataset_multithread("datasets/MOSI/Raw", num_workers=8)
-    # split_dataset_multithread("datasets/MOSEI/Raw", num_workers=8)
+    split_dataset_multithread("datasets/MOSEI/Raw", num_workers=8)
     # split_dataset_multithread("datasets/SIMS/Raw", num_workers=8)
