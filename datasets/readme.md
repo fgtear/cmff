@@ -4,7 +4,6 @@ ffmpeg - i /Users/fgtear/Downloads/8.mp4 -t 30 -c:v copy -c:a copy -y -loglevel 
 
 
 ## MOSI:
-resolution: 480 × 360
 train: 1284
 valid: 229
 test: 686
@@ -12,7 +11,6 @@ total: 2199
 
 
 ## MOSEI:
-resolution: 1280 × 720
 train: 16326
 valid: 1871
 test: 4659
@@ -20,7 +18,6 @@ total: 22856
 
 
 ## CH-SIMS:
-resolution: 1920 × 804
 train: 1368
 valid: 456
 test: 457
@@ -30,7 +27,6 @@ M：multimodal，T：text，A：audio，V：visual
 
 
 ## CH-SIMSv2:
-resolution: 1920 × 1080
 train: 2722
 valid: 647
 test: 1034
